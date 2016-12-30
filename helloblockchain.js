@@ -54,17 +54,19 @@ function init() {
     printNetworkDetails();
     //Check if chaincode is already deployed
     //TODO: Deploy failures aswell returns chaincodeID, How to address such issue?
-    if (fileExists(chaincodeIDPath)) {
+   // if (fileExists(chaincodeIDPath)) {
         // Read chaincodeID and use this for sub sequent Invokes/Queries
-        chaincodeID = fs.readFileSync(chaincodeIDPath, 'utf8');
-        chain.getUser(newUserName, function(err, user) {
+        //chaincodeID = fs.readFileSync(chaincodeIDPath, 'utf8');
+        chaincodeID='46bf013ede7240b1d0ac21466e4d5f53f2e541a864adcdae6528aada50a0858e06b21b8399d2cadce699ae1352042b73f9da151ca4d498badb7ef20435d729c2'
+        invoke();
+       /* chain.getUser(newUserName, function(err, user) {
             if (err) throw Error(" Failed to register and enroll " + deployerName + ": " + err);
             userObj = user;
             invoke();
-        });
-    } else {
+        });*/
+   /* } else {
         enrollAndRegisterUsers();
-    }
+    }*/
 }
 
 function setup() {

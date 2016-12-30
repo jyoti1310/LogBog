@@ -223,12 +223,14 @@ var options = 	{
 								}
 					},
 					chaincode:{
-						zip_url: 'https://github.com/ibm-blockchain/marbles/archive/v2.0.zip',
-						unzip_dir: 'marbles-2.0/chaincode',													//subdirectroy name of chaincode after unzipped
-						git_url: 'http://gopkg.in/ibm-blockchain/marbles.v2/chaincode',						//GO get http url
+						//zip_url: 'https://github.com/ibm-blockchain/marbles/archive/v2.0.zip',
+						unzip_dir: 'LogBog/chaincode',													//subdirectroy name of chaincode after unzipped
+						//git_url: 'http://gopkg.in/ibm-blockchain/marbles.v2/chaincode',						//GO get http url
+						git_url:'https://github.com/jyoti1310/LogBog/tree/master/chaincode'
 					
 						//hashed cc name from prev deployment, comment me out to always deploy, uncomment me when its already deployed to skip deploying again
 						//deployed_name: '16e655c0fce6a9882896d3d6d11f7dcd4f45027fd4764004440ff1e61340910a9d67685c4bb723272a497f3cf428e6cf6b009618612220e1471e03b6c0aa76cb'
+						//deployed_name: '46bf013ede7240b1d0ac21466e4d5f53f2e541a864adcdae6528aada50a0858e06b21b8399d2cadce699ae1352042b73f9da151ca4d498badb7ef20435d729c2'
 					}
 				};
 if(process.env.VCAP_SERVICES){
@@ -341,7 +343,7 @@ function cb_deployed(e){
 			});
 		};
 		
-		// ========================================================
+		/*// ========================================================
 		// Monitor the height of the blockchain
 		// ========================================================
 		ibc.monitor_blockheight(function(chain_stats){										//there is a new block, lets refresh everything that has a state
@@ -408,6 +410,6 @@ function cb_deployed(e){
 					}
 				}
 			}
-		});
+		});*/
 	}
 }
