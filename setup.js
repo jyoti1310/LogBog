@@ -54,7 +54,7 @@ else{
 							HOST:'localhost',
 							PORT: 3001,
 							DESCRIPTION: 'Localhost',
-							EXTURI: 'localhost:3000',	//no longer used 4/29/2016
+							EXTURI: 'localhost:3001',	//no longer used 4/29/2016
 						 };
 }
 

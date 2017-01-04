@@ -6,24 +6,32 @@ var chaincode = {};
 var async = require('async');
 
 module.exports.setup = function(sdk, cc){
+	console.log('inside logbog setUp!');
 	ibc = sdk;
 	chaincode = cc;
 };
 
 module.exports.process_msg = function(ws, data){
+	console.log('inside process_msg!');
+	console.log('data.v='+ data.v);
+	chaincode.invoke.addToLogBog(["101",
+        "190",
+    	"Shikha",
+    	"09-09-2016",
+    	"20"], cb_invoked);	//create a new marble([data.name, data.color, data.size, data.user], cb_invoked);	//create a new marble
 	if(data.v === 1){																						//only look at messages for part 1
 		if(data.type == 'addToLogBog'){
-			console.log('its a create!');
+			console.log('its addToLogBog!');
 			if(data.name && data.color && data.size && data.user){
 				chaincode.invoke.init_marble([data.name, data.color, data.size, data.user], cb_invoked);	//create a new marble
 			}
 		}
 		else if(data.type == 'searchLogBog'){
-			console.log('get marbles msg');
+			console.log('get searchLogBog');
 			chaincode.query.read(['_marbleindex'], cb_got_index);
 		}
 		else if(data.type == 'updateLogBog'){
-			console.log('transfering msg');
+			console.log('its updateLogBog');
 			if(data.name && data.user){
 				chaincode.invoke.set_user([data.name, data.user]);
 			}

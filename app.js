@@ -26,11 +26,11 @@ var url = require('url');
 var setup = require('./setup');
 var fs = require('fs');
 var cors = require('cors');
-
+//let logbogUI = require(__dirname+'/public/js/logbogUI.js');
 //// Set Server Parameters ////
 var host = setup.SERVER.HOST;
 var port = setup.SERVER.PORT;
-
+var WebSocket = require('ws/lib/WebSocket')
 ////////  Pathing and Module Setup  ////////
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -223,10 +223,10 @@ var options = 	{
 								}
 					},
 					chaincode:{
-						//zip_url: 'https://github.com/ibm-blockchain/marbles/archive/v2.0.zip',
-						unzip_dir: 'LogBog/chaincode',													//subdirectroy name of chaincode after unzipped
+						zip_url: 'https://github.com/jyoti1310/LogBog/archive/master.zip',
+						unzip_dir: 'LogBog-master/chaincode',													//subdirectroy name of chaincode after unzipped
 						//git_url: 'http://gopkg.in/ibm-blockchain/marbles.v2/chaincode',						//GO get http url
-						git_url:'https://github.com/jyoti1310/LogBog/tree/master/chaincode'
+						git_url:'https://github.com/jyoti1310/LogBog/chaincode'
 					
 						//hashed cc name from prev deployment, comment me out to always deploy, uncomment me when its already deployed to skip deploying again
 						//deployed_name: '16e655c0fce6a9882896d3d6d11f7dcd4f45027fd4764004440ff1e61340910a9d67685c4bb723272a497f3cf428e6cf6b009618612220e1471e03b6c0aa76cb'
@@ -248,20 +248,43 @@ ibc.load(options, function (err, cc){														//parse/load chaincode, respo
 	else{
 		chaincode = cc;
 		part1.setup(ibc, cc);																//pass the cc obj to part 1 node code
-
+		cc.details.deployed_name='46a15d309b2e21300e4f6eb0624d552fa426c1556ac9866870841ed7c6bbfab4e87e1ffb334f397f9fdb3a87013f7b9815d6fad788397f70c60cc3c32c061f75'
 		// ---- To Deploy or Not to Deploy ---- //
-		if(!cc.details.deployed_name || cc.details.deployed_name === ''){					//yes, go deploy
-			cc.deploy('init', ['99'], {delay_ms: 30000}, function(e){ 						//delay_ms is milliseconds to wait after deploy for conatiner to start, 50sec recommended
+		/*if(!cc.details.deployed_name || cc.details.deployed_name === ''){					//yes, go deploy
+			cc.deploy('init', ['99'], {delay_ms: 60000}, function(e){ 						//delay_ms is milliseconds to wait after deploy for conatiner to start, 50sec recommended
 				check_if_deployed(e, 1);
 			});
 		}
 		else{																				//no, already deployed
 			console.log('chaincode summary file indicates chaincode has been previously deployed');
 			check_if_deployed(null, 1);
-		}
+		}*/
+		cb_deployed(null);		
+		//logbogUI.init();
+		connect_to_server();
+		var obj = 	{
+				type: 'addToLogBog',
+				//name: marbleName,
+				//user: user,
+				v: 1
+			};
+		sendMsg(JSON.stringify(obj));
+		
 	}
 });
 
+//send a message, socket might be closed...
+function sendMsg(json){
+	console.log('inside sendMsg');
+	if(ws){
+		try{
+			ws.send(JSON.stringify(json));
+		}
+		catch(e){
+			console.log('[ws error] could not send msg', e);
+		}
+	}
+}
 //loop here, check if chaincode is up and running or not
 function check_if_deployed(e, attempt){
 	if(e){
@@ -320,6 +343,7 @@ function cb_deployed(e){
 			ws.on('message', function incoming(message) {
 				console.log('received ws msg:', message);
 				try{
+					console.log('calling process_msg:', message);
 					var data = JSON.parse(message);
 					part1.process_msg(ws, data);											//pass the websocket msg to part 1 processing
 				}
@@ -411,5 +435,75 @@ function cb_deployed(e){
 				}
 			}
 		});*/
+	}
+}
+
+//=================================================================================
+//Socket Stuff
+//=================================================================================
+function connect_to_server(){
+	var connected = false;
+	connect();
+	
+	function connect(){
+		//var wsUri = 'ws://' + document.location.hostname + ':' + document.location.port;
+		var wsUri = 'ws://' + 'localhost' + ':' + '3001';
+		console.log('Connectiong to websocket', wsUri);
+		
+		ws = new WebSocket(wsUri);
+		ws.onopen = function(evt) { onOpen(evt); };
+		ws.onclose = function(evt) { onClose(evt); };
+		ws.onmessage = function(evt) { onMessage(evt); };
+		ws.onerror = function(evt) { onError(evt); };
+	}
+	
+	function onOpen(evt){
+		console.log('WS CONNECTED');
+		connected = true;
+		//clear_blocks();
+		//$('#errorNotificationPanel').fadeOut();
+		ws.send(JSON.stringify({type: 'get', v:1}));
+		//ws.send(JSON.stringify({type: 'chainstats', v:1}));
+	}
+
+	function onClose(evt){
+		console.log('WS DISCONNECTED', evt);
+		connected = false;
+		setTimeout(function(){ connect(); }, 5000);					//try again one more time, server restarts are quick
+	}
+
+	function onMessage(msg){
+		try{
+			var msgObj = JSON.parse(msg.data);
+			if(msgObj.marble){
+				console.log('rec', msgObj.msg, msgObj);
+				//build_ball(msgObj.marble);
+			}
+			else if(msgObj.msg === 'chainstats'){
+				console.log('rec', msgObj.msg, ': ledger blockheight', msgObj.chainstats.height, 'block', msgObj.blockstats.height);
+				var e = formatDate(msgObj.blockstats.transactions[0].timestamp.seconds * 1000, '%M/%d/%Y &nbsp;%I:%m%P');
+				$('#blockdate').html('<span style="color:#fff">TIME</span>&nbsp;&nbsp;' + e + ' UTC');
+				var temp =  {
+								id: msgObj.blockstats.height, 
+								blockstats: msgObj.blockstats
+							};
+				new_block(temp);								//send to blockchain.js
+			}
+			else console.log('rec', msgObj.msg, msgObj);
+		}
+		catch(e){
+			console.log('ERROR', e);
+		}
+	}
+
+	function onError(evt){
+		console.log('ERROR ', evt);
+		if(!connected && bag.e == null){											//don't overwrite an error message
+			$('#errorName').html('Warning');
+			$('#errorNoticeText').html('Waiting on the node server to open up so we can talk to the blockchain. ');
+			$('#errorNoticeText').append('This app is likely still starting up. ');
+			$('#errorNoticeText').append('Check the server logs if this message does not go away in 1 minute. ');
+			$('#errorNotificationPanel').fadeIn();
+		}
 	}
 }

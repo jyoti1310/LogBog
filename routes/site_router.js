@@ -33,10 +33,16 @@ router.route('/').get(function(req, res){
 // Part 1
 // ============================================================================================================================
 router.route('/p1').get(function(req, res){
-	res.render('part1', {title: 'Marbles Part 1', bag: build_bag()});
+	console.log('inside site router');
+	res.render('logbogUI', {title: 'Marbles Part 1', bag: build_bag()});
 });
 router.route('/p1/:page?').get(function(req, res){
-	res.render('part1', {title: 'Marbles Part 1', bag: build_bag()});
+	res.render('logbogUI', {title: 'Marbles Part 1', bag: build_bag()});
+});
+
+router.route('/p3').get(function(req, res){
+	console.log('inside site router');
+	res.render('logbogUI');
 });
 
 // ============================================================================================================================
