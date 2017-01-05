@@ -14,28 +14,29 @@ module.exports.setup = function(sdk, cc){
 module.exports.process_msg = function(ws, data){
 	console.log('inside process_msg!');
 	console.log('data.v='+ data.v);
-	chaincode.invoke.addToLogBog(["101",
+	console.log('data.type='+ data.type);
+	/*chaincode.invoke.addToLogBog(["101",
         "190",
     	"Shikha",
     	"09-09-2016",
-    	"20"], cb_invoked);	//create a new marble([data.name, data.color, data.size, data.user], cb_invoked);	//create a new marble
+    	"20"], cb_invoked);*/	//create a new marble([data.name, data.color, data.size, data.user], cb_invoked);	//create a new Employee
 	if(data.v === 1){																						//only look at messages for part 1
 		if(data.type == 'addToLogBog'){
 			console.log('its addToLogBog!');
-			if(data.name && data.color && data.size && data.user){
-				chaincode.invoke.init_marble([data.name, data.color, data.size, data.user], cb_invoked);	//create a new marble
+			if(data.cprNum && data.VirkNum && data.cprNavn && data.DOW && data.NoOFHours){
+				chaincode.invoke.addToLogBog([data.cprNum, data.VirkNum, data.cprNavn, data.DOW, data.NoOFHours], cb_invoked);	//create a new Employee
 			}
 		}
 		else if(data.type == 'searchLogBog'){
 			console.log('get searchLogBog');
-			chaincode.query.read(['_marbleindex'], cb_got_index);
+			chaincode.query.searchLogBog([data.cprNum,data.VirkNum], cb_got_employee);
 		}
-		else if(data.type == 'updateLogBog'){
-			console.log('its updateLogBog');
-			if(data.name && data.user){
-				chaincode.invoke.set_user([data.name, data.user]);
-			}
-		}
+//		else if(data.type == 'updateLogBog'){
+//			console.log('its updateLogBog');
+//			if(data.name && data.user){
+//				chaincode.invoke.set_user([data.name, data.user]);
+//			}
+//		}
 //		else if(data.type == 'remove'){
 //			console.log('removing msg');
 //			if(data.name){
@@ -49,10 +50,12 @@ module.exports.process_msg = function(ws, data){
 	}
 
 	//got the marble index, lets get each marble
-	function cb_got_index(e, index){
-		if(e != null) console.log('[ws error] did not get marble index:', e);
+	function cb_got_employee(e, employees){
+		if(e != null) console.log('[ws error] did not find any employee:', e);
 		else{
-			try{
+			console.log('employee:'+ employees);
+			sendMsg({msg: 'employees', e: e, employees: JSON.parse(employees)});
+			/*try{
 				var json = JSON.parse(index);
 				var keys = Object.keys(json);
 				var concurrency = 1;
@@ -73,7 +76,7 @@ module.exports.process_msg = function(ws, data){
 			}
 			catch(e){
 				console.log('[ws error] could not parse response', e);
-			}
+			}*/
 		}
 	}
 	
