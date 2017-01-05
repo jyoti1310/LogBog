@@ -248,7 +248,7 @@ ibc.load(options, function (err, cc){														//parse/load chaincode, respo
 	else{
 		chaincode = cc;
 		part1.setup(ibc, cc);																//pass the cc obj to part 1 node code
-		cc.details.deployed_name='c163f62197b636b628bc533c2a92398f3397507b24206b7cd85aaabf4d94a73a9ff197ba347ac5bb6df8fa926a84c41cd8a87d2c1a7704a418cbf28be37f3a38'
+		cc.details.deployed_name='46a15d309b2e21300e4f6eb0624d552fa426c1556ac9866870841ed7c6bbfab4e87e1ffb334f397f9fdb3a87013f7b9815d6fad788397f70c60cc3c32c061f75'
 		// ---- To Deploy or Not to Deploy ---- //
 		/*if(!cc.details.deployed_name || cc.details.deployed_name === ''){					//yes, go deploy
 			cc.deploy('init', ['99'], {delay_ms: 60000}, function(e){ 						//delay_ms is milliseconds to wait after deploy for conatiner to start, 50sec recommended
